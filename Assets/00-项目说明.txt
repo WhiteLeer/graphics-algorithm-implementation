@@ -1,0 +1,134 @@
+═══════════════════════════════════════════════════════════════════════════════
+                            Unity项目 - 文件结构说明
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 项目目录结构
+
+Assets/
+│
+├─ PostProcessDebugSystem/           ⭐ 通用后处理Debug系统
+│  ├─ ConsoleLogger.cs               ← Console日志收集（Play模式）
+│  ├─ DebugDataCapture.cs            ← 运行时捕获器（Play模式）
+│  ├─ README.txt                     ← 完整使用说明
+│  └─ Editor/
+│     ├─ PostProcessDebugWindow.cs   ← 统一Debug窗口 ⭐核心⭐
+│     ├─ EditorConsoleLogger.cs      ← Editor日志收集（自动启动）
+│     ├─ EditorDebugCapture.cs       ← Editor模式捕获器
+│     └─ DebugDataAnalyzer.cs        ← 数据分析工具
+│
+├─ Func-2/                           ⭐ SSPR专用文件
+│  ├─ SSPR.shader                    ← SSPR正式版Shader
+│  ├─ SSPR_DebugVis.shader           ← SSPR Debug可视化Shader
+│  ├─ SSPRRenderFeature.cs           ← SSPR Render Feature
+│  ├─ SSPRRenderPass.cs              ← SSPR Render Pass
+│  ├─ SSPR原理详解.txt               ← SSPR技术文档
+│  ├─ SSPR技术要点.txt               ← SSPR要点总结
+│  └─ SSPR_调试说明.txt              ← SSPR调试说明
+│
+└─ DebugCaptures/                    ⭐ Debug数据输出目录（自动创建）
+   ├─ SSPR_20260312_143025.png       ← 截图
+   ├─ SSPR_20260312_143025_Console.txt ← 日志
+   └─ SSPR_20260312_143025_Report.txt  ← 报告
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 核心系统：通用后处理Debug系统 v2.0
+
+特点：
+✓ 自动扫描 - 发现所有Render Features
+✓ 统一管理 - 一个窗口管理所有效果
+✓ 零配置 - 无需手动为每个效果添加Editor
+✓ AI集成 - 一键生成，Claude自动分析
+
+打开方式：
+Window → Post Process Debug Center
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 快速使用流程
+
+1. 打开Debug窗口
+   Window → Post Process Debug Center
+
+2. 点击任意效果的 [📷 Capture Debug Data]
+   • Play模式：完整效果 + 性能数据（推荐）
+   • Editor模式：无需运行，但效果可能不完整
+
+3. 对Claude说："请分析Debug数据"
+
+4. Claude自动读取 → 分析 → 定位问题 → 修复代码
+
+完成！
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📦 已实现的后处理效果
+
+1. SSPR (Screen Space Planar Reflection)
+   • 位置：Func-2/
+   • 状态：✅ 完成（已移除Ray Marching，改用直接投影）
+   • Debug：支持3x2网格可视化
+   • 文档：完整
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🆕 添加新后处理效果
+
+1. 创建你的Render Feature和Shader
+
+2. （可选）如需Debug可视化，在Settings中添加：
+   public bool enableDebugVisualization = false;
+
+3. 完成！系统会自动识别
+
+无需任何手动配置，Debug窗口会自动显示你的效果。
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔧 Editor工具菜单
+
+[Window]
+  └─ Post Process Debug Center    ← 统一Debug窗口 ⭐主入口⭐
+
+[Tools → Post Process Debug]
+  ├─ 📊 Analyze Latest Data        ← 显示最新Debug摘要
+  ├─ 📂 Open Debug Folder          ← 打开DebugCaptures
+  └─ 🗑️ Clear All Debug Files      ← 清理所有Debug文件
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 文档位置
+
+• 通用系统说明：PostProcessDebugSystem/README.txt
+• SSPR技术文档：Func-2/SSPR原理详解.txt
+• SSPR调试说明：Func-2/SSPR_调试说明.txt
+• 本文件：Assets/00-项目说明.txt
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 设计原则
+
+1. 通用性优先
+   • 所有后处理共用一套系统
+   • 不为单个效果创建专用工具
+
+2. 自动化优先
+   • 自动扫描、自动识别、自动收集
+   • 减少手动配置
+
+3. 清晰的文件结构
+   • 通用系统独立文件夹
+   • 各效果专用文件分开管理
+
+4. AI友好
+   • 标准化输出格式
+   • 一键生成完整数据包
+   • Claude可直接读取分析
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎉 开始使用
+
+打开：Window → Post Process Debug Center
+
+═══════════════════════════════════════════════════════════════════════════════
