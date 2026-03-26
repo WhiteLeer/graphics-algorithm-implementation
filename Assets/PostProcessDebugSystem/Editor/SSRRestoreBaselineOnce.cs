@@ -109,6 +109,17 @@ public static class SSRRestoreBaselineOnce
     private static void SetEnum(SerializedProperty settings, string name, int value)
     {
         SerializedProperty p = settings.FindPropertyRelative(name);
-        if (p != null) p.enumValueIndex = value;
+        if (p == null)
+            return;
+
+        if (p.propertyType == SerializedPropertyType.Enum)
+        {
+            // Use underlying enum value instead of enumValueIndex to avoid out-of-range
+            // when enum definitions change or are sparse.
+            p.intValue = value;
+            return;
+        }
+
+        p.intValue = value;
     }
 }
