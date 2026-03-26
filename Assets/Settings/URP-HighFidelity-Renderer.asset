@@ -37,9 +37,9 @@ MonoBehaviour:
   settings:
     planeNormal: {x: 0, y: 1, z: 0}
     planeDistance: 0
-    intensity: 1.9
-    fresnelPower: 1.5
-    normalThreshold: 0.5
+    intensity: 0.53
+    fresnelPower: 3.22
+    normalThreshold: 0.199
     maxPlaneDistance: 0
     enableReflectorBounds: 1
     reflectorCenter: {x: 0, y: 0, z: 0}
@@ -107,6 +107,7 @@ MonoBehaviour:
     debugStep2: 5
     debugStep3: 1
     debugStep4: 7
+    runtimeDebugStep: 7
     renderPassEvent: 240
 --- !u!114 &-640686616906439502
 MonoBehaviour:
@@ -205,16 +206,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    intensity: 0.5
-    radius: 0.149
-    sampleCount: 32
-    beta: 0
+    intensity: 4
+    radius: 1
+    sampleCount: 4
+    beta: 0.0132
     enableBlur: 1
     enableDebugVisualization: 0
     debugStep1: 16
     debugStep2: 5
     debugStep3: 1
     debugStep4: 7
+    runtimeDebugStep: 7
     renderPassEvent: 300
 --- !u!114 &8216759374003212733
 MonoBehaviour:
@@ -263,4 +265,4 @@ MonoBehaviour:
     debugStep3: 17
     debugStep4: 18
     runtimeDebugStep: 0
-    renderPassEvent: 300
+    renderPassEvent: 400

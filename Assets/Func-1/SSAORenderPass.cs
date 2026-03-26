@@ -4,6 +4,7 @@ using UnityEngine.Rendering.Universal;
 
 public class SSAORenderPass : ScriptableRenderPass
 {
+    private static readonly int s_DebugModeId = Shader.PropertyToID("_DebugMode");
     private Material m_Material;
     private SSAORenderFeature.Settings m_Settings;
     private ScriptableRenderer m_Renderer;
@@ -67,6 +68,9 @@ public class SSAORenderPass : ScriptableRenderPass
             1.0f / desc.height
         ));
 
+        int debugStep = m_Settings.enableDebugVisualization ? (int)m_Settings.runtimeDebugStep : -1;
+        m_Material.SetInt(s_DebugModeId, debugStep);
+
         // View空间重建参数（Unity方法）
         SetupViewSpaceParams(camera);
     }
@@ -75,25 +79,18 @@ public class SSAORenderPass : ScriptableRenderPass
     {
         Matrix4x4 view = camera.worldToCameraMatrix;
         Matrix4x4 proj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, false);
-
-        // 计算cview和cviewProj（移除平移）
         Matrix4x4 cview = view;
         cview.SetColumn(3, new Vector4(0, 0, 0, 1));
         Matrix4x4 cviewProj = proj * cview;
 
-        // Unity官方方法：计算frustum corners（View空间 → 世界空间）
-        float tanHalfFOV = Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+        // 1) 在View空间计算近平面角点
+        float tanHalfFov = Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
         float aspect = camera.aspect;
+        Vector3 topLeftView = new Vector3(-tanHalfFov * aspect, tanHalfFov, -1f);
+        Vector3 topRightView = new Vector3(tanHalfFov * aspect, tanHalfFov, -1f);
+        Vector3 bottomLeftView = new Vector3(-tanHalfFov * aspect, -tanHalfFov, -1f);
 
-        // 1. 先在View空间计算近平面的四个角
-        // Unity View空间：相机在原点看向-Z，Y向上，X向右
-        // 注意：Z=-1，用于depth scaling
-        Vector3 topLeftView = new Vector3(-tanHalfFOV * aspect, tanHalfFOV, -1);
-        Vector3 topRightView = new Vector3(tanHalfFOV * aspect, tanHalfFOV, -1);
-        Vector3 bottomLeftView = new Vector3(-tanHalfFOV * aspect, -tanHalfFOV, -1);
-
-        // 2. 转换到世界空间（使用cview的逆矩阵 = 只有旋转的View→World）
-        // cview移除了平移，所以逆矩阵就是相机的旋转
+        // 2) 旋转到世界空间向量（不带平移）
         Matrix4x4 cviewInv = cview.inverse;
         Vector3 topLeft = cviewInv.MultiplyPoint3x4(topLeftView);
         Vector3 topRight = cviewInv.MultiplyPoint3x4(topRightView);
@@ -107,11 +104,10 @@ public class SSAORenderPass : ScriptableRenderPass
         m_Material.SetVector(Shader.PropertyToID("_CameraViewYExtent"), yExtent);
         m_Material.SetVector(Shader.PropertyToID("_ProjectionParams2"), new Vector4(1.0f / camera.nearClipPlane, 0, 0, 0));
 
-        // Unity官方方法：传递cviewProj用于投影
+        // 这里必须是 cviewProj（去平移），与世界空间向量重建保持一致。
         m_Material.SetMatrix(Shader.PropertyToID("_CameraViewProjections"), cviewProj);
 
-        // Unity官方方法：传递View矩阵第三行用于计算z距离
-        // 因为ReconstructViewPos返回的是世界空间向量，需要用View矩阵转换到View空间深度
+        // View matrix Z row for z distance reconstruction (same intent as URP's UNITY_MATRIX_V[2].xyz).
         Vector4 viewZRow = new Vector4(view.m20, view.m21, view.m22, view.m23);
         m_Material.SetVector(Shader.PropertyToID("_CameraViewZRow"), viewZRow);
     }
@@ -128,6 +124,15 @@ public class SSAORenderPass : ScriptableRenderPass
             // Pass 0: 计算AO（输出到RT1）
             Blit(cmd, m_Renderer.cameraColorTarget, m_SSAORT1, m_Material, 0);
 
+            if (m_Settings.enableDebugVisualization)
+            {
+                // Debug模式直接显示Pass0输出，避免被后续pack/blur/final逻辑污染。
+                Blit(cmd, m_SSAORT1, m_Renderer.cameraColorTarget);
+                context.ExecuteCommandBuffer(cmd);
+                CommandBufferPool.Release(cmd);
+                return;
+            }
+
             if (m_Settings.enableBlur)
             {
                 // Pass 1: 水平模糊（RT1 → RT2）
@@ -140,19 +145,19 @@ public class SSAORenderPass : ScriptableRenderPass
 
                 // Pass 3: 最终输出（RT3 → Final）
                 cmd.SetGlobalTexture(Shader.PropertyToID("_BaseMap"), m_SSAORT3);
+                Blit(cmd, m_SSAORT3, m_SSAOFinal, m_Material, 3);
             }
             else
             {
                 // 不模糊：直接使用RT1
                 cmd.SetGlobalTexture(Shader.PropertyToID("_BaseMap"), m_SSAORT1);
+                Blit(cmd, m_SSAORT1, m_SSAOFinal, m_Material, 3);
             }
-
-            Blit(cmd, m_SSAORT1, m_SSAOFinal, m_Material, 3);
 
             // 设置全局AO纹理
             cmd.SetGlobalTexture("_ScreenSpaceOcclusionTexture", m_SSAOFinal);
 
-            // Pass 4: 应用到场景
+            // Pass 4: 应用到场景（乘法混合）
             Blit(cmd, m_Renderer.cameraColorTarget, m_Renderer.cameraColorTarget, m_Material, 4);
         }
 

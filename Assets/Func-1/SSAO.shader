@@ -382,7 +382,7 @@ Shader "Hidden/SSAO"
             half4 BlurH_Frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                float2 delta = float2(_SourceSize.z * 2.0, 0.0);
+                float2 delta = float2(_SourceSize.z, 0.0);
 
                 // 5-tap高斯（Unity权重）
                 half4 p0 = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);
@@ -425,7 +425,7 @@ Shader "Hidden/SSAO"
             half4 BlurV_Frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                float2 delta = float2(0.0, _SourceSize.w * 2.0);
+                float2 delta = float2(0.0, _SourceSize.w);
 
                 // 5-tap高斯
                 half4 p0 = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);

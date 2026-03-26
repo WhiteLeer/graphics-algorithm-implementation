@@ -9,6 +9,7 @@
 ✓ 统一管理 - 一个窗口管理所有效果
 ✓ Console监听 - 自动收集运行时日志
 ✓ AI集成 - 一键生成数据，Claude自动分析
+✓ MCP桥接 - 支持Unity MCP多阶段截图流程（阶段切换 + 每阶段日志）
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -53,8 +54,51 @@ PostProcessDebugSystem/
 │  ├─ PostProcessDebugWindow.cs          ← 统一Debug窗口 ⭐核心⭐
 │  ├─ EditorConsoleLogger.cs             ← Editor模式日志收集（自动启动）
 │  ├─ EditorDebugCapture.cs              ← Editor模式捕获器
+│  ├─ McpStageCaptureBridge.cs           ← MCP多阶段桥接（请求/响应 + 日志）
 │  └─ DebugDataAnalyzer.cs               ← 数据分析工具
 └─ README.txt                            ← 本文件
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔌 Unity MCP 多阶段截图流程（推荐）
+
+目标：
+• 截图由 Unity MCP `manage_camera.screenshot` 负责（更稳定）
+• 阶段切换/参数快照/每阶段日志由 `McpStageCaptureBridge` 负责
+
+请求文件（由外部工具写入）：
+Assets/DebugCaptures/.mcp_stage_request.json
+
+响应文件（Unity写回）：
+Assets/DebugCaptures/.mcp_stage_response.json
+
+支持命令：
+1. `begin_session`
+2. `set_stage`
+3. `end_session`
+
+示例请求（set_stage）：
+{
+  "command": "set_stage",
+  "featureType": "SSRRenderFeature",
+  "sessionId": "SSR_20260326_A",
+  "stageLabel": "Step1",
+  "runtimeDebugStep": 16,
+  "enableDebugVisualization": true,
+  "exportConsole": true
+}
+
+产物目录：
+Assets/DebugCaptures/MCP/<sessionId>/
+• `MCP_Capture_Report.txt`（阶段记录 + 参数快照）
+• `*_Console.txt`（每阶段日志）
+• 截图文件（由MCP截图指令保存）
+
+推荐循环：
+1. 写入 `begin_session`
+2. 依次写入多个 `set_stage`
+3. 每次 `set_stage` 成功后调用 `manage_camera.screenshot`
+4. 写入 `end_session`
 
 ═══════════════════════════════════════════════════════════════════════════════
 

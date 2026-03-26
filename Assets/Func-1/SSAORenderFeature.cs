@@ -49,6 +49,7 @@ public class SSAORenderFeature : ScriptableRendererFeature
         public SSAODebugStep debugStep2 = SSAODebugStep.ViewPosVector;
         public SSAODebugStep debugStep3 = SSAODebugStep.Depth;
         public SSAODebugStep debugStep4 = SSAODebugStep.FinalAO;
+        public SSAODebugStep runtimeDebugStep = SSAODebugStep.FinalAO;
 
         [Header("Rendering")]
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
