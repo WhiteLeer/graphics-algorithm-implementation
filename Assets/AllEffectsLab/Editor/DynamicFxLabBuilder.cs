@@ -9,12 +9,12 @@ using UnityEngine.SceneManagement;
 public static class DynamicFxLabBuilder
 {
     private const string ScenePath = "Assets/Scenes/AllEffects-DynamicLab.unity";
-    private const string MaterialRoot = "Assets/AllEffectsLab/Generated";
+    private const string MaterialRoot = "Assets/MaterialFX/Common_LitLibrary";
 
     [MenuItem("Tools/All Effects/Build Dynamic Test Scene")]
     public static void BuildScene()
     {
-        EnsureFolder("Assets/AllEffectsLab");
+        EnsureFolder("Assets/MaterialFX");
         EnsureFolder(MaterialRoot);
 
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
