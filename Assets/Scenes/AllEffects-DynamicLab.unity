@@ -173,11 +173,11 @@ MonoBehaviour:
   center: {x: 0, y: 0.65, z: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 1.6
-  angularSpeed: 93750
+  angularSpeed: 11718750
   bobAmplitude: 0.15
   bobFrequency: 0.35
   selfSpinAxis: {x: 0.2, y: 1, z: 0.1}
-  selfSpinSpeed: 87500
+  selfSpinSpeed: 10937500
 --- !u!23 &133066241
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -325,7 +325,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseEuler: {x: 40, y: -35, z: 0}
   pitchSwing: {x: -10, y: 10}
-  cycleSeconds: 0.00576
+  cycleSeconds: 0.00004608
   baseIntensity: 1.1
   intensitySwing: 0.25
 --- !u!108 &325025192
@@ -460,7 +460,7 @@ MonoBehaviour:
   center: {x: 0, y: 0.45, z: 0}
   axis: {x: 0, y: 1, z: 0}
   radius: 2.4
-  angularSpeed: -212500
+  angularSpeed: -26562500
   bobAmplitude: 0
   bobFrequency: 1
   selfSpinAxis: {x: 0, y: 1, z: 0}
@@ -737,7 +737,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   axis: {x: 0, y: 1, z: 0.2}
-  speed: -78125
+  speed: -9765625
 --- !u!23 &741632159
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1503,7 +1503,7 @@ MonoBehaviour:
   distance: 10
   minDistance: 4
   maxDistance: 18
-  autoOrbitSpeed: 43750
+  autoOrbitSpeed: 5468750
   autoOrbit: 1
   mouseSensitivity: 2.2
   pitchMin: -20
@@ -1803,7 +1803,7 @@ MonoBehaviour:
   center: {x: 2.2, y: 1.2, z: 1.8}
   axis: {x: 0, y: 1, z: 0}
   radius: 0.85
-  angularSpeed: -168750
+  angularSpeed: -21093750
   bobAmplitude: 0.2
   bobFrequency: 1.2
   selfSpinAxis: {x: 0, y: 1, z: 0}
@@ -1938,7 +1938,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   axis: {x: 0.3, y: 1, z: 0}
-  speed: 68750
+  speed: 8593750
 --- !u!23 &1884425471
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1959,7 +1959,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fa4e2fbc83898fb40b807e2a633d2323, type: 2}
+  - {fileID: 2100000, guid: e35200073c755224db43c090fe23e660, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2052,7 +2052,7 @@ MonoBehaviour:
   center: {x: 1.8, y: 1.2, z: 1.2}
   axis: {x: 0, y: 1, z: 0.2}
   radius: 0.9
-  angularSpeed: 162500
+  angularSpeed: 20312500
   bobAmplitude: 0.25
   bobFrequency: 0.9
   selfSpinAxis: {x: 0, y: 1, z: 0}
@@ -2120,3 +2120,72 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1938253390}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &5297689440867212568
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4991190890754428536, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_Name
+      value: Player_Girl
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624878317630198978, guid: 681c24070ed7a474daa5af1ebf95033e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 681c24070ed7a474daa5af1ebf95033e, type: 3}

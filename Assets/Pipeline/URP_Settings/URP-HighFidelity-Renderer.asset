@@ -347,4 +347,4 @@ MonoBehaviour:
     debugStep3: 17
     debugStep4: 18
     runtimeDebugStep: 0
-    renderPassEvent: 400
+    renderPassEvent: 300

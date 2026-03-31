@@ -5,11 +5,24 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
+using System;
 
 public static class DynamicFxLabBuilder
 {
     private const string ScenePath = "Assets/Scenes/AllEffects-DynamicLab.unity";
+    private const string CharacterScenePath = "Assets/Scenes/Character-AnimeRender-Test.unity";
     private const string MaterialRoot = "Assets/MaterialFX/Common_LitLibrary";
+    private const string CharacterPrefabPath = "Assets/_Prefab/Player_Girl.prefab";
+    private const string CharacterShotDir = "Assets/Screenshots/CharacterTest";
+    private const string Npr0Root = "Assets/MaterialFX/NPR-0_BaseLighting";
+    private const string Npr0MaterialDir = Npr0Root + "/Materials";
+    private const string Npr0ConvertedDir = Npr0MaterialDir + "/CharacterConverted";
+    private const string Npr0TemplatePath = Npr0MaterialDir + "/M_NPR0_ToonTemplate.mat";
+    private const string Npr2Root = "Assets/MaterialFX/NPR-2_RampOutline";
+    private const string Npr2MaterialDir = Npr2Root + "/Materials";
+    private const string Npr2ConvertedDir = Npr2MaterialDir + "/CharacterConverted";
+    private const string Npr2TemplatePath = Npr2MaterialDir + "/M_NPR2_RampOutlineTemplate.mat";
+    private const string Npr2DefaultRampPath = Npr2Root + "/Textures/T_Ramp_Default.png";
 
     [MenuItem("Tools/All Effects/Build Dynamic Test Scene")]
     public static void BuildScene()
@@ -178,6 +191,303 @@ public static class DynamicFxLabBuilder
         Debug.Log("[AllEffects] Ensure URP renderer enables SSAO/SSPR/SSR/Bloom/DoF features.");
     }
 
+    [MenuItem("Tools/All Effects/Build Character Anime Test Scene")]
+    public static void BuildCharacterRenderTestScene()
+    {
+        EnsureFolder("Assets/Scenes");
+        EnsureFolder("Assets/MaterialFX");
+        EnsureFolder(MaterialRoot);
+        EnsureFolder(Npr0Root);
+        EnsureFolder(Npr0MaterialDir);
+        EnsureFolder(Npr0ConvertedDir);
+        EnsureFolder(Npr2Root);
+        EnsureFolder(Npr2MaterialDir);
+        EnsureFolder(Npr2ConvertedDir);
+
+        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        Material floorMat = GetOrCreateLitMaterial(
+            MaterialRoot + "/M_CharacterFloor.mat",
+            new Color(0.45f, 0.46f, 0.50f, 1.0f),
+            metallic: 0.0f,
+            smoothness: 0.22f,
+            emission: Color.black);
+
+        Material wallMat = GetOrCreateLitMaterial(
+            MaterialRoot + "/M_CharacterBackWall.mat",
+            new Color(0.62f, 0.64f, 0.68f, 1.0f),
+            metallic: 0.0f,
+            smoothness: 0.08f,
+            emission: Color.black);
+
+        GameObject root = new GameObject("CharacterRenderTest_Root");
+
+        GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        floor.name = "Floor_Neutral";
+        floor.transform.SetParent(root.transform, false);
+        floor.transform.localScale = new Vector3(3.8f, 1.0f, 3.8f);
+        floor.GetComponent<Renderer>().sharedMaterial = floorMat;
+
+        GameObject backWall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        backWall.name = "Background_Card";
+        backWall.transform.SetParent(root.transform, false);
+        backWall.transform.position = new Vector3(0.0f, 2.0f, 4.0f);
+        backWall.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+        backWall.transform.localScale = new Vector3(5.0f, 4.0f, 0.15f);
+        backWall.GetComponent<Renderer>().sharedMaterial = wallMat;
+
+        GameObject character = null;
+        GameObject characterPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(CharacterPrefabPath);
+        if (characterPrefab != null)
+        {
+            character = PrefabUtility.InstantiatePrefab(characterPrefab, scene) as GameObject;
+            if (character != null)
+            {
+                character.name = "Player_Girl_Test";
+                character.transform.SetParent(root.transform, true);
+                character.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+                character.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+                character.transform.localScale = Vector3.one;
+                NormalizeCharacterHeight(character, 1.65f);
+                SnapCharacterToGround(character);
+                ApplyNpr0MaterialsToCharacter(character);
+            }
+        }
+        else
+        {
+            Debug.LogError("[AllEffects] Missing prefab: " + CharacterPrefabPath);
+        }
+
+        GameObject mainCamera = CreateMainCamera(root.transform);
+        if (character != null)
+        {
+            GameObject cameraTarget = GameObject.Find("Camera_Target");
+            Transform target = cameraTarget != null ? cameraTarget.transform : null;
+            if (target != null)
+            {
+                target.position = character.transform.position + new Vector3(0.0f, 1.25f, 0.0f);
+            }
+        }
+
+        GameObject dirLight = CreateStaticDirectionalLight(root.transform);
+        CreateCharacterFillLight(root.transform);
+        CreateCharacterRimLight(root.transform);
+
+        RenderSettings.sun = dirLight.GetComponent<Light>();
+        RenderSettings.ambientIntensity = 1.0f;
+        RenderSettings.reflectionIntensity = 0.35f;
+
+        if (!EditorSceneManager.SaveScene(scene, CharacterScenePath))
+        {
+            Debug.LogError("Failed to save scene at: " + CharacterScenePath);
+            return;
+        }
+
+        EditorSceneManager.OpenScene(CharacterScenePath, OpenSceneMode.Single);
+        if (character != null)
+        {
+            Selection.activeObject = character;
+            EditorGUIUtility.PingObject(character);
+        }
+        else
+        {
+            Selection.activeObject = mainCamera;
+            EditorGUIUtility.PingObject(mainCamera);
+        }
+
+        Debug.Log("[AllEffects] Character anime render test scene built: " + CharacterScenePath);
+        Debug.Log("[AllEffects] Prefab source: " + CharacterPrefabPath);
+        Debug.Log("[AllEffects] Ensure URP renderer enables SSAO/SSPR/SSR/SSGI/MotionBlur/ColorGrading features.");
+    }
+
+    [MenuItem("Tools/All Effects/Finalize Character NPR Stage And Capture")]
+    public static void FinalizeCharacterNprStageAndCapture()
+    {
+        BuildCharacterRenderTestScene();
+        FinalizeCharacterNprStage();
+        CaptureCharacterAnimeTestShots();
+    }
+
+    [MenuItem("Tools/All Effects/Finalize Character NPR Stage")]
+    public static void FinalizeCharacterNprStage()
+    {
+        if (!File.Exists(CharacterScenePath))
+        {
+            Debug.LogWarning("[AllEffects] Character scene missing, rebuilding first.");
+            BuildCharacterRenderTestScene();
+        }
+
+        Scene scene = EditorSceneManager.OpenScene(CharacterScenePath, OpenSceneMode.Single);
+        if (!scene.IsValid())
+        {
+            Debug.LogError("[AllEffects] Failed to open scene: " + CharacterScenePath);
+            return;
+        }
+
+        RemoveIfExists("SideWall");
+        RemoveIfExists("Floor_ReflectivePlate");
+        RemoveIfExists("Scene_ReflectionProbe");
+
+        GameObject floor = GameObject.Find("Floor_Neutral");
+        if (floor == null)
+            floor = GameObject.Find("Floor_Main");
+        if (floor != null)
+        {
+            floor.name = "Floor_Neutral";
+            floor.transform.position = Vector3.zero;
+            floor.transform.rotation = Quaternion.identity;
+            floor.transform.localScale = new Vector3(3.8f, 1.0f, 3.8f);
+        }
+
+        GameObject card = GameObject.Find("Background_Card");
+        if (card == null)
+            card = GameObject.Find("BackWall");
+        if (card != null)
+        {
+            card.name = "Background_Card";
+            card.transform.position = new Vector3(0.0f, 2.0f, 4.0f);
+            card.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            card.transform.localScale = new Vector3(5.0f, 4.0f, 0.15f);
+        }
+
+        if (!EditorSceneManager.SaveScene(scene, CharacterScenePath))
+            Debug.LogError("[AllEffects] Save failed after finalizing: " + CharacterScenePath);
+        else
+            Debug.Log("[AllEffects] Character NPR stage finalized: " + CharacterScenePath);
+    }
+
+    [MenuItem("Tools/All Effects/Apply NPR-2 Materials To Character")]
+    public static void ApplyNpr2MaterialsToCharacterInScene()
+    {
+        GameObject character = GameObject.Find("Player_Girl_Test");
+        if (character == null)
+            character = GameObject.Find("Player_Girl");
+        if (character == null)
+        {
+            Debug.LogWarning("[AllEffects] Character not found. Expected: Player_Girl_Test or Player_Girl.");
+            return;
+        }
+
+        ApplyNpr2MaterialsToCharacter(character);
+        EditorSceneManager.MarkSceneDirty(character.scene);
+        Debug.Log("[AllEffects] Applied NPR-2 materials to character.");
+    }
+
+    [MenuItem("Tools/All Effects/Capture Character Anime Test Shots")]
+    public static void CaptureCharacterAnimeTestShots()
+    {
+        EnsureFolder("Assets/Screenshots");
+        EnsureFolder(CharacterShotDir);
+
+        if (!File.Exists(CharacterScenePath))
+            EditorSceneManager.OpenScene(CharacterScenePath, OpenSceneMode.Single);
+        else
+            EditorSceneManager.OpenScene(CharacterScenePath, OpenSceneMode.Single);
+
+        string timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        string gamePath = $"{CharacterShotDir}/CharacterTest-Game-{timestamp}.png";
+        string scenePath = $"{CharacterShotDir}/CharacterTest-Scene-{timestamp}.png";
+
+        GameObject target = GameObject.Find("Player_Girl_Test");
+        if (target == null)
+            target = GameObject.Find("Player_Girl");
+
+        Vector3 focus = target != null ? target.transform.position + Vector3.up * 1.15f : Vector3.zero;
+
+        GameObject gameCamGo = new GameObject("Temp_GameCaptureCamera");
+        Camera gameCam = gameCamGo.AddComponent<Camera>();
+        gameCam.clearFlags = CameraClearFlags.Skybox;
+        gameCam.fieldOfView = 42.0f;
+        gameCam.nearClipPlane = 0.1f;
+        gameCam.farClipPlane = 250.0f;
+        gameCam.transform.position = focus + new Vector3(0.0f, 0.3f, -3.1f);
+        gameCam.transform.LookAt(focus);
+        CaptureFromCamera(gameCam, gamePath, 1600, 900);
+        GameObject.DestroyImmediate(gameCamGo);
+
+        GameObject tempCamGo = new GameObject("Temp_SceneCaptureCamera");
+        Camera tempCam = tempCamGo.AddComponent<Camera>();
+        tempCam.clearFlags = CameraClearFlags.Skybox;
+        tempCam.fieldOfView = 48.0f;
+        tempCam.nearClipPlane = 0.1f;
+        tempCam.farClipPlane = 250.0f;
+        tempCam.transform.position = focus + new Vector3(4.2f, 3.0f, -4.4f);
+        tempCam.transform.LookAt(focus);
+        CaptureFromCamera(tempCam, scenePath, 1600, 900);
+        GameObject.DestroyImmediate(tempCamGo);
+
+        AssetDatabase.Refresh();
+        Debug.Log("[AllEffects] Capture done.");
+        Debug.Log("[AllEffects] Game shot: " + gamePath);
+        Debug.Log("[AllEffects] Scene shot: " + scenePath);
+    }
+
+    [MenuItem("Tools/All Effects/Apply Character Lighting Preset")]
+    public static void ApplyCharacterLightingPreset()
+    {
+        GameObject dir = GameObject.Find("Directional Light");
+        GameObject fill = GameObject.Find("Character_FillPointLight");
+        GameObject rim = GameObject.Find("Character_RimPointLight");
+
+        if (dir == null || fill == null || rim == null)
+        {
+            Debug.LogWarning("[AllEffects] Missing light objects for lighting preset.");
+            return;
+        }
+
+        Transform dirT = dir.transform;
+        Light dirL = dir.GetComponent<Light>();
+        if (dirL != null)
+        {
+            dirT.rotation = Quaternion.Euler(48.0f, 20.0f, 0.0f);
+            dirL.type = LightType.Directional;
+            dirL.intensity = 0.95f;
+            dirL.color = new Color(0.98f, 0.98f, 1.0f, 1.0f);
+            dirL.shadows = LightShadows.Soft;
+            dirL.shadowStrength = 0.58f;
+            EditorUtility.SetDirty(dirL);
+        }
+        EditorUtility.SetDirty(dirT);
+
+        Transform fillT = fill.transform;
+        Light fillL = fill.GetComponent<Light>();
+        if (fillL != null)
+        {
+            fillT.position = new Vector3(-1.75f, 1.6f, -0.35f);
+            fillL.type = LightType.Point;
+            fillL.intensity = 0.34f;
+            fillL.range = 5.0f;
+            fillL.color = new Color(0.77f, 0.87f, 1.0f, 1.0f);
+            fillL.shadows = LightShadows.None;
+            EditorUtility.SetDirty(fillL);
+        }
+        EditorUtility.SetDirty(fillT);
+
+        Transform rimT = rim.transform;
+        Light rimL = rim.GetComponent<Light>();
+        if (rimL != null)
+        {
+            rimT.position = new Vector3(1.75f, 2.05f, 1.25f);
+            rimL.type = LightType.Point;
+            rimL.intensity = 0.46f;
+            rimL.range = 4.4f;
+            rimL.color = new Color(1.0f, 0.91f, 0.82f, 1.0f);
+            rimL.shadows = LightShadows.None;
+            EditorUtility.SetDirty(rimL);
+        }
+        EditorUtility.SetDirty(rimT);
+
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = new Color(0.18f, 0.21f, 0.27f, 1.0f);
+        RenderSettings.ambientIntensity = 0.55f;
+        RenderSettings.fog = false;
+
+        if (SceneManager.GetActiveScene().IsValid())
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+
+        Debug.Log("[AllEffects] Character lighting preset applied.");
+    }
+
     private static GameObject CreateMainCamera(Transform parent)
     {
         GameObject cameraGo = new GameObject("Main Camera");
@@ -211,7 +521,7 @@ public static class DynamicFxLabBuilder
         orbit.target = target.transform;
         orbit.targetOffset = Vector3.zero;
         orbit.distance = 10.0f;
-        orbit.autoOrbit = true;
+        orbit.autoOrbit = false;
         orbit.autoOrbitSpeed = 14.0f;
 
         return cameraGo;
@@ -230,6 +540,50 @@ public static class DynamicFxLabBuilder
         light.shadowStrength = 0.9f;
 
         go.AddComponent<FxLabDirectionalLightAnimator>();
+        return go;
+    }
+
+    private static GameObject CreateStaticDirectionalLight(Transform parent)
+    {
+        GameObject go = new GameObject("Directional Light");
+        go.transform.SetParent(parent, false);
+        go.transform.rotation = Quaternion.Euler(44.0f, -28.0f, 0.0f);
+
+        Light light = go.AddComponent<Light>();
+        light.type = LightType.Directional;
+        light.intensity = 1.05f;
+        light.shadows = LightShadows.Soft;
+        light.shadowStrength = 0.85f;
+        return go;
+    }
+
+    private static GameObject CreateCharacterFillLight(Transform parent)
+    {
+        GameObject go = new GameObject("Character_FillPointLight");
+        go.transform.SetParent(parent, false);
+        go.transform.position = new Vector3(-1.3f, 1.9f, -1.0f);
+
+        Light light = go.AddComponent<Light>();
+        light.type = LightType.Point;
+        light.intensity = 1.1f;
+        light.range = 5.0f;
+        light.color = new Color(0.86f, 0.90f, 1.0f);
+        light.shadows = LightShadows.None;
+        return go;
+    }
+
+    private static GameObject CreateCharacterRimLight(Transform parent)
+    {
+        GameObject go = new GameObject("Character_RimPointLight");
+        go.transform.SetParent(parent, false);
+        go.transform.position = new Vector3(1.5f, 2.0f, 1.7f);
+
+        Light light = go.AddComponent<Light>();
+        light.type = LightType.Point;
+        light.intensity = 1.3f;
+        light.range = 4.2f;
+        light.color = new Color(0.98f, 0.98f, 1.0f);
+        light.shadows = LightShadows.None;
         return go;
     }
 
@@ -312,6 +666,342 @@ public static class DynamicFxLabBuilder
 
         EditorUtility.SetDirty(mat);
         return mat;
+    }
+
+    private static void ApplyNpr0MaterialsToCharacter(GameObject character)
+    {
+        if (character == null)
+            return;
+
+        Shader nprShader = Shader.Find("Custom/NPR-0/ToonBasicURP");
+        if (nprShader == null)
+        {
+            Debug.LogWarning("[AllEffects] NPR-0 shader not found: Custom/NPR-0/ToonBasicURP");
+            return;
+        }
+
+        Material template = GetOrCreateNpr0TemplateMaterial(nprShader);
+        SkinnedMeshRenderer[] renderers = character.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        for (int r = 0; r < renderers.Length; r++)
+        {
+            SkinnedMeshRenderer smr = renderers[r];
+            Material[] mats = smr.sharedMaterials;
+            bool changed = false;
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                Material src = mats[i];
+                Material converted = src != null ? GetOrCreateConvertedNpr0Material(src, nprShader) : template;
+                if (converted != null && converted != mats[i])
+                {
+                    mats[i] = converted;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                smr.sharedMaterials = mats;
+                EditorUtility.SetDirty(smr);
+            }
+        }
+    }
+
+    private static void ApplyNpr2MaterialsToCharacter(GameObject character)
+    {
+        if (character == null)
+            return;
+
+        Shader nprShader = Shader.Find("Custom/NPR-2/RampOutlineURP");
+        if (nprShader == null)
+        {
+            Debug.LogWarning("[AllEffects] NPR-2 shader not found: Custom/NPR-2/RampOutlineURP");
+            return;
+        }
+
+        Material template = GetOrCreateNpr2TemplateMaterial(nprShader);
+        SkinnedMeshRenderer[] renderers = character.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        for (int r = 0; r < renderers.Length; r++)
+        {
+            SkinnedMeshRenderer smr = renderers[r];
+            Material[] mats = smr.sharedMaterials;
+            bool changed = false;
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                Material src = mats[i];
+                Material converted = src != null ? GetOrCreateConvertedNpr2Material(src, nprShader) : template;
+                if (converted != null && converted != mats[i])
+                {
+                    mats[i] = converted;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                smr.sharedMaterials = mats;
+                EditorUtility.SetDirty(smr);
+            }
+        }
+    }
+
+    private static Material GetOrCreateNpr0TemplateMaterial(Shader shader)
+    {
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(Npr0TemplatePath);
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, Npr0TemplatePath);
+        }
+
+        mat.shader = shader;
+        Texture2D rampTex = AssetDatabase.LoadAssetAtPath<Texture2D>(Npr2DefaultRampPath);
+        if (rampTex != null)
+            mat.SetTexture("_RampMap", rampTex);
+        mat.SetColor("_BaseColor", Color.white);
+        mat.SetColor("_ShadeColor", new Color(0.72f, 0.74f, 0.80f, 1.0f));
+        mat.SetFloat("_ShadeThreshold", 0.50f);
+        mat.SetFloat("_ShadeSoftness", 0.06f);
+        mat.SetFloat("_ShadowStrength", 0.85f);
+        mat.SetColor("_SpecColor", new Color(1.0f, 1.0f, 1.0f, 1.0f));
+        mat.SetFloat("_SpecThreshold", 0.78f);
+        mat.SetFloat("_SpecSoftness", 0.04f);
+        mat.SetColor("_RimColor", new Color(1.0f, 1.0f, 1.0f, 1.0f));
+        mat.SetFloat("_RimPower", 3.8f);
+        mat.SetFloat("_RimStrength", 0.25f);
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    private static Material GetOrCreateConvertedNpr0Material(Material source, Shader nprShader)
+    {
+        string safeName = SanitizeFileName(source.name);
+        string targetPath = Npr0ConvertedDir + "/" + safeName + "_NPR0.mat";
+        Material target = AssetDatabase.LoadAssetAtPath<Material>(targetPath);
+        if (target == null)
+        {
+            target = new Material(nprShader);
+            AssetDatabase.CreateAsset(target, targetPath);
+        }
+
+        target.shader = nprShader;
+        Texture2D rampTex = AssetDatabase.LoadAssetAtPath<Texture2D>(Npr2DefaultRampPath);
+        if (rampTex != null)
+            target.SetTexture("_RampMap", rampTex);
+
+        Texture baseMap = null;
+        if (source.HasProperty("_BaseMap"))
+            baseMap = source.GetTexture("_BaseMap");
+        else if (source.HasProperty("_MainTex"))
+            baseMap = source.GetTexture("_MainTex");
+        target.SetTexture("_BaseMap", baseMap);
+
+        if (source.HasProperty("_BaseMap") && source.HasProperty("_BaseMap_ST"))
+            target.SetVector("_BaseMap_ST", source.GetVector("_BaseMap_ST"));
+
+        Color baseColor = Color.white;
+        if (source.HasProperty("_BaseColor"))
+            baseColor = source.GetColor("_BaseColor");
+        else if (source.HasProperty("_Color"))
+            baseColor = source.GetColor("_Color");
+        target.SetColor("_BaseColor", baseColor);
+
+        if (source.HasProperty("_BumpMap"))
+            target.SetTexture("_NormalMap", source.GetTexture("_BumpMap"));
+        if (source.HasProperty("_BumpScale"))
+            target.SetFloat("_NormalScale", source.GetFloat("_BumpScale"));
+
+        float cutoff = source.HasProperty("_Cutoff") ? source.GetFloat("_Cutoff") : 0.5f;
+        target.SetFloat("_Cutoff", cutoff);
+
+        float alphaClip = source.IsKeywordEnabled("_ALPHATEST_ON") ? 1.0f : 0.0f;
+        target.SetFloat("_AlphaClip", alphaClip);
+
+        target.SetColor("_ShadeColor", new Color(0.72f, 0.74f, 0.80f, 1.0f));
+        target.SetFloat("_ShadeThreshold", 0.50f);
+        target.SetFloat("_ShadeSoftness", 0.06f);
+        target.SetFloat("_ShadowStrength", 0.85f);
+        target.SetColor("_SpecColor", new Color(1.0f, 1.0f, 1.0f, 1.0f));
+        target.SetFloat("_SpecThreshold", 0.78f);
+        target.SetFloat("_SpecSoftness", 0.04f);
+        target.SetColor("_RimColor", new Color(1.0f, 1.0f, 1.0f, 1.0f));
+        target.SetFloat("_RimPower", 3.8f);
+        target.SetFloat("_RimStrength", 0.25f);
+
+        EditorUtility.SetDirty(target);
+        return target;
+    }
+
+    private static Material GetOrCreateNpr2TemplateMaterial(Shader shader)
+    {
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(Npr2TemplatePath);
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, Npr2TemplatePath);
+        }
+
+        mat.shader = shader;
+        mat.SetColor("_BaseColor", Color.white);
+        mat.SetFloat("_RampOffset", 0.0f);
+        mat.SetFloat("_RampContrast", 1.0f);
+        mat.SetFloat("_RampStrength", 1.0f);
+        mat.SetFloat("_ShadowStrength", 1.0f);
+        mat.SetFloat("_AmbientStrength", 0.15f);
+        mat.SetColor("_SpecColor", Color.white);
+        mat.SetFloat("_SpecThreshold", 0.90f);
+        mat.SetFloat("_SpecSoftness", 0.03f);
+        mat.SetColor("_RimColor", Color.white);
+        mat.SetFloat("_RimPower", 3.8f);
+        mat.SetFloat("_RimStrength", 0.28f);
+        mat.SetFloat("_AdditionalLightStrength", 0.20f);
+        mat.SetColor("_OutlineColor", new Color(0.07f, 0.09f, 0.12f, 1.0f));
+        mat.SetFloat("_OutlineWidth", 4.0f);
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    private static Material GetOrCreateConvertedNpr2Material(Material source, Shader nprShader)
+    {
+        string safeName = SanitizeFileName(source.name);
+        string targetPath = Npr2ConvertedDir + "/" + safeName + "_NPR2.mat";
+        Material target = AssetDatabase.LoadAssetAtPath<Material>(targetPath);
+        if (target == null)
+        {
+            target = new Material(nprShader);
+            AssetDatabase.CreateAsset(target, targetPath);
+        }
+
+        target.shader = nprShader;
+
+        Texture baseMap = null;
+        if (source.HasProperty("_BaseMap"))
+            baseMap = source.GetTexture("_BaseMap");
+        else if (source.HasProperty("_MainTex"))
+            baseMap = source.GetTexture("_MainTex");
+        target.SetTexture("_BaseMap", baseMap);
+
+        if (source.HasProperty("_BaseMap_ST"))
+            target.SetVector("_BaseMap_ST", source.GetVector("_BaseMap_ST"));
+
+        Color baseColor = Color.white;
+        if (source.HasProperty("_BaseColor"))
+            baseColor = source.GetColor("_BaseColor");
+        else if (source.HasProperty("_Color"))
+            baseColor = source.GetColor("_Color");
+        target.SetColor("_BaseColor", baseColor);
+
+        if (source.HasProperty("_BumpMap"))
+            target.SetTexture("_NormalMap", source.GetTexture("_BumpMap"));
+        if (source.HasProperty("_BumpScale"))
+            target.SetFloat("_NormalScale", source.GetFloat("_BumpScale"));
+
+        float cutoff = source.HasProperty("_Cutoff") ? source.GetFloat("_Cutoff") : 0.5f;
+        target.SetFloat("_Cutoff", cutoff);
+        target.SetFloat("_AlphaClip", source.IsKeywordEnabled("_ALPHATEST_ON") ? 1.0f : 0.0f);
+
+        target.SetFloat("_RampOffset", 0.0f);
+        target.SetFloat("_RampContrast", 1.0f);
+        target.SetFloat("_RampStrength", 1.0f);
+        target.SetFloat("_ShadowStrength", 1.0f);
+        target.SetFloat("_AmbientStrength", 0.15f);
+        target.SetColor("_SpecColor", Color.white);
+        target.SetFloat("_SpecThreshold", 0.90f);
+        target.SetFloat("_SpecSoftness", 0.03f);
+        target.SetColor("_RimColor", Color.white);
+        target.SetFloat("_RimPower", 3.8f);
+        target.SetFloat("_RimStrength", 0.28f);
+        target.SetFloat("_AdditionalLightStrength", 0.20f);
+        target.SetColor("_OutlineColor", new Color(0.07f, 0.09f, 0.12f, 1.0f));
+        target.SetFloat("_OutlineWidth", 4.0f);
+
+        EditorUtility.SetDirty(target);
+        return target;
+    }
+
+    private static void CaptureFromCamera(Camera cam, string outputPath, int width, int height)
+    {
+        RenderTexture prevRT = cam.targetTexture;
+        RenderTexture activeRT = RenderTexture.active;
+
+        RenderTexture rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+        Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+
+        cam.targetTexture = rt;
+        cam.Render();
+        RenderTexture.active = rt;
+        tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        tex.Apply(false, false);
+
+        byte[] bytes = tex.EncodeToPNG();
+        File.WriteAllBytes(outputPath, bytes);
+
+        cam.targetTexture = prevRT;
+        RenderTexture.active = activeRT;
+        UnityEngine.Object.DestroyImmediate(rt);
+        UnityEngine.Object.DestroyImmediate(tex);
+    }
+
+    private static void RemoveIfExists(string objectName)
+    {
+        GameObject go = GameObject.Find(objectName);
+        if (go != null)
+            UnityEngine.Object.DestroyImmediate(go);
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return "Material";
+
+        char[] invalid = Path.GetInvalidFileNameChars();
+        string result = name;
+        for (int i = 0; i < invalid.Length; i++)
+            result = result.Replace(invalid[i], '_');
+        return result;
+    }
+
+    private static void SnapCharacterToGround(GameObject character)
+    {
+        if (character == null)
+            return;
+
+        Renderer[] renderers = character.GetComponentsInChildren<Renderer>(true);
+        if (renderers == null || renderers.Length == 0)
+            return;
+
+        Bounds b = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+            b.Encapsulate(renderers[i].bounds);
+
+        float deltaY = -b.min.y;
+        if (Mathf.Abs(deltaY) > 0.0001f)
+        {
+            Vector3 pos = character.transform.position;
+            pos.y += deltaY;
+            character.transform.position = pos;
+        }
+    }
+
+    private static void NormalizeCharacterHeight(GameObject character, float targetHeight)
+    {
+        if (character == null || targetHeight <= 0.01f)
+            return;
+
+        Renderer[] renderers = character.GetComponentsInChildren<Renderer>(true);
+        if (renderers == null || renderers.Length == 0)
+            return;
+
+        Bounds b = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+            b.Encapsulate(renderers[i].bounds);
+
+        float currentHeight = Mathf.Max(b.size.y, 0.0001f);
+        float factor = targetHeight / currentHeight;
+
+        if (factor > 0.001f && factor < 1000.0f)
+            character.transform.localScale *= factor;
     }
 }
 #endif
