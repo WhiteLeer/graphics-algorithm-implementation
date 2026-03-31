@@ -23,6 +23,10 @@ public static class DynamicFxLabBuilder
     private const string Npr2ConvertedDir = Npr2MaterialDir + "/CharacterConverted";
     private const string Npr2TemplatePath = Npr2MaterialDir + "/M_NPR2_RampOutlineTemplate.mat";
     private const string Npr2DefaultRampPath = Npr2Root + "/Textures/T_Ramp_Default.png";
+    private const string Npr3Root = "Assets/MaterialFX/NPR-3_CharacterAdvanced";
+    private const string Npr3MaterialDir = Npr3Root + "/Materials";
+    private const string Npr3ConvertedDir = Npr3MaterialDir + "/CharacterConverted";
+    private const string Npr3TemplatePath = Npr3MaterialDir + "/M_NPR3_CharacterAdvancedTemplate.mat";
 
     [MenuItem("Tools/All Effects/Build Dynamic Test Scene")]
     public static void BuildScene()
@@ -203,6 +207,9 @@ public static class DynamicFxLabBuilder
         EnsureFolder(Npr2Root);
         EnsureFolder(Npr2MaterialDir);
         EnsureFolder(Npr2ConvertedDir);
+        EnsureFolder(Npr3Root);
+        EnsureFolder(Npr3MaterialDir);
+        EnsureFolder(Npr3ConvertedDir);
 
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -272,6 +279,7 @@ public static class DynamicFxLabBuilder
         GameObject dirLight = CreateStaticDirectionalLight(root.transform);
         CreateCharacterFillLight(root.transform);
         CreateCharacterRimLight(root.transform);
+        EnsureCharacterPreviewHelpers(root.transform);
 
         RenderSettings.sun = dirLight.GetComponent<Light>();
         RenderSettings.ambientIntensity = 1.0f;
@@ -371,6 +379,23 @@ public static class DynamicFxLabBuilder
         ApplyNpr2MaterialsToCharacter(character);
         EditorSceneManager.MarkSceneDirty(character.scene);
         Debug.Log("[AllEffects] Applied NPR-2 materials to character.");
+    }
+
+    [MenuItem("Tools/All Effects/Apply NPR-3 Materials To Character")]
+    public static void ApplyNpr3MaterialsToCharacterInScene()
+    {
+        GameObject character = GameObject.Find("Player_Girl_Test");
+        if (character == null)
+            character = GameObject.Find("Player_Girl");
+        if (character == null)
+        {
+            Debug.LogWarning("[AllEffects] Character not found. Expected: Player_Girl_Test or Player_Girl.");
+            return;
+        }
+
+        ApplyNpr3MaterialsToCharacter(character);
+        EditorSceneManager.MarkSceneDirty(character.scene);
+        Debug.Log("[AllEffects] Applied NPR-3 materials to character.");
     }
 
     [MenuItem("Tools/All Effects/Capture Character Anime Test Shots")]
@@ -486,6 +511,21 @@ public static class DynamicFxLabBuilder
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
         Debug.Log("[AllEffects] Character lighting preset applied.");
+    }
+
+    [MenuItem("Tools/All Effects/Setup Character Preview Helpers")]
+    public static void SetupCharacterPreviewHelpersInScene()
+    {
+        GameObject root = GameObject.Find("CharacterRenderTest_Root");
+        if (root == null)
+        {
+            Debug.LogWarning("[AllEffects] CharacterRenderTest_Root not found.");
+            return;
+        }
+
+        EnsureCharacterPreviewHelpers(root.transform);
+        EditorSceneManager.MarkSceneDirty(root.scene);
+        Debug.Log("[AllEffects] Character preview helpers are ready.");
     }
 
     private static GameObject CreateMainCamera(Transform parent)
@@ -622,6 +662,92 @@ public static class DynamicFxLabBuilder
         probe.timeSlicingMode = UnityEngine.Rendering.ReflectionProbeTimeSlicingMode.IndividualFaces;
         probe.size = new Vector3(20.0f, 8.0f, 20.0f);
         probe.intensity = 1.0f;
+    }
+
+    private static void EnsureCharacterPreviewHelpers(Transform root)
+    {
+        if (root == null)
+            return;
+
+        Transform grpScene = EnsureChildGroup(root, "_00_场景");
+        Transform grpCharacter = EnsureChildGroup(root, "_10_角色");
+        Transform grpCamera = EnsureChildGroup(root, "_20_相机");
+        Transform grpLights = EnsureChildGroup(root, "_30_灯光");
+        Transform grpControl = EnsureChildGroup(root, "_90_控制");
+
+        ReparentByName("Floor_Neutral", grpScene);
+        ReparentByName("Background_Card", grpScene);
+        ReparentByName("Player_Girl_Test", grpCharacter);
+        ReparentByName("Player_Girl", grpCharacter);
+        ReparentByName("Main Camera", grpCamera);
+        ReparentByName("Camera_Target", grpCamera);
+        ReparentByName("Directional Light", grpLights);
+        ReparentByName("Character_FillPointLight", grpLights);
+        ReparentByName("Character_RimPointLight", grpLights);
+
+        Transform helper = root.Find("Preview_GlobalController");
+        if (helper == null)
+        {
+            GameObject go = new GameObject("Preview_GlobalController");
+            go.transform.SetParent(grpControl, false);
+            helper = go.transform;
+        }
+        else if (helper.parent != grpControl)
+        {
+            helper.SetParent(grpControl, true);
+        }
+
+        FxLabGlobalMotionController controller = helper.GetComponent<FxLabGlobalMotionController>();
+        if (controller == null)
+            controller = helper.gameObject.AddComponent<FxLabGlobalMotionController>();
+
+        controller.globalSpeed = 1.0f;
+        controller.syncTimeScale = false;
+        controller.spinMultiplier = 1.0f;
+        controller.orbitMultiplier = 1.0f;
+        controller.cameraOrbitMultiplier = 1.0f;
+        controller.lightCycleMultiplier = 1.0f;
+        controller.includeInactive = true;
+
+        GameObject cameraGo = GameObject.Find("Main Camera");
+        if (cameraGo != null)
+        {
+            FxLabCameraOrbit orbit = cameraGo.GetComponent<FxLabCameraOrbit>();
+            if (orbit != null)
+            {
+                orbit.autoOrbit = false;
+                orbit.distance = Mathf.Clamp(orbit.distance, 3.5f, 6.0f);
+                orbit.minDistance = 2.8f;
+                orbit.maxDistance = 8.5f;
+                orbit.mouseSensitivity = 2.2f;
+            }
+        }
+    }
+
+    private static Transform EnsureChildGroup(Transform parent, string name)
+    {
+        Transform child = parent.Find(name);
+        if (child != null)
+            return child;
+
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        return go.transform;
+    }
+
+    private static void ReparentByName(string objectName, Transform newParent)
+    {
+        if (newParent == null)
+            return;
+
+        GameObject go = GameObject.Find(objectName);
+        if (go == null)
+            return;
+
+        if (go.transform.parent == newParent)
+            return;
+
+        go.transform.SetParent(newParent, true);
     }
 
     private static void EnsureFolder(string folder)
@@ -776,7 +902,7 @@ public static class DynamicFxLabBuilder
 
     private static Material GetOrCreateConvertedNpr0Material(Material source, Shader nprShader)
     {
-        string safeName = SanitizeFileName(source.name);
+        string safeName = GetCanonicalBaseMaterialName(source.name);
         string targetPath = Npr0ConvertedDir + "/" + safeName + "_NPR0.mat";
         Material target = AssetDatabase.LoadAssetAtPath<Material>(targetPath);
         if (target == null)
@@ -864,7 +990,7 @@ public static class DynamicFxLabBuilder
 
     private static Material GetOrCreateConvertedNpr2Material(Material source, Shader nprShader)
     {
-        string safeName = SanitizeFileName(source.name);
+        string safeName = GetCanonicalBaseMaterialName(source.name);
         string targetPath = Npr2ConvertedDir + "/" + safeName + "_NPR2.mat";
         Material target = AssetDatabase.LoadAssetAtPath<Material>(targetPath);
         if (target == null)
@@ -920,6 +1046,186 @@ public static class DynamicFxLabBuilder
         return target;
     }
 
+    private static void ApplyNpr3MaterialsToCharacter(GameObject character)
+    {
+        if (character == null)
+            return;
+
+        Shader nprShader = Shader.Find("Custom/NPR-3/CharacterAdvancedURP");
+        if (nprShader == null)
+        {
+            Debug.LogWarning("[AllEffects] NPR-3 shader not found: Custom/NPR-3/CharacterAdvancedURP");
+            return;
+        }
+
+        Material template = GetOrCreateNpr3TemplateMaterial(nprShader);
+        SkinnedMeshRenderer[] renderers = character.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        for (int r = 0; r < renderers.Length; r++)
+        {
+            SkinnedMeshRenderer smr = renderers[r];
+            Material[] mats = smr.sharedMaterials;
+            bool changed = false;
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                Material src = mats[i];
+                Material converted = src != null ? GetOrCreateConvertedNpr3Material(src, nprShader) : template;
+                if (converted != null && converted != mats[i])
+                {
+                    mats[i] = converted;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                smr.sharedMaterials = mats;
+                EditorUtility.SetDirty(smr);
+            }
+        }
+    }
+
+    private static Material GetOrCreateNpr3TemplateMaterial(Shader shader)
+    {
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(Npr3TemplatePath);
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, Npr3TemplatePath);
+        }
+
+        mat.shader = shader;
+        Texture2D rampTex = AssetDatabase.LoadAssetAtPath<Texture2D>(Npr2DefaultRampPath);
+        if (rampTex != null)
+            mat.SetTexture("_RampMap", rampTex);
+
+        mat.SetColor("_BaseColor", Color.white);
+        mat.SetFloat("_RampOffset", 0.0f);
+        mat.SetFloat("_RampContrast", 1.28f);
+        mat.SetFloat("_RampStrength", 1.10f);
+        mat.SetFloat("_RampBands", 4.0f);
+        mat.SetFloat("_ShadowStrength", 0.92f);
+        mat.SetFloat("_AmbientStrength", 0.14f);
+        mat.SetColor("_ShadowTintColor", new Color(0.75f, 0.83f, 1.0f, 1.0f));
+        mat.SetFloat("_ShadowTintStrength", 0.35f);
+        mat.SetColor("_ShadowCoolColor", new Color(0.72f, 0.82f, 1.0f, 1.0f));
+        mat.SetColor("_ShadowWarmColor", new Color(1.0f, 0.86f, 0.74f, 1.0f));
+        mat.SetFloat("_ShadowStylizeStrength", 0.0f);
+        mat.SetFloat("_ShadowTerminatorWidth", 0.28f);
+        mat.SetFloat("_ShadowTerminatorSoftness", 0.22f);
+        mat.SetColor("_SpecColor", new Color(0.38f, 0.38f, 0.38f, 1.0f));
+        mat.SetFloat("_SpecThreshold", 0.994f);
+        mat.SetFloat("_SpecSoftness", 0.005f);
+        mat.SetFloat("_HairSpecStrength", 0.0f);
+        mat.SetFloat("_HairSpecShift", 0.10f);
+        mat.SetFloat("_HairSpecExponent1", 64.0f);
+        mat.SetFloat("_HairSpecExponent2", 20.0f);
+        mat.SetFloat("_HairSpecSecondaryStrength", 0.45f);
+        mat.SetColor("_RimColor", Color.white);
+        mat.SetFloat("_RimPower", 3.8f);
+        mat.SetFloat("_RimStrength", 0.08f);
+        mat.SetFloat("_AdditionalLightStrength", 0.10f);
+        mat.SetFloat("_ColorSaturation", 1.30f);
+        mat.SetFloat("_FaceRegionWeight", 0.0f);
+        mat.SetFloat("_FaceShadowLift", 0.0f);
+        mat.SetFloat("_FaceForwardWrap", 0.0f);
+        mat.SetFloat("_FaceSpecBoost", 0.0f);
+        mat.SetFloat("_FaceRimSuppress", 0.0f);
+        mat.SetColor("_OutlineColor", new Color(0.08f, 0.11f, 0.16f, 1.0f));
+        mat.SetFloat("_OutlineWidth", 3.0f);
+        mat.SetFloat("_OutlineMinScale", 0.55f);
+        mat.SetFloat("_OutlineDistanceStart", 2.0f);
+        mat.SetFloat("_OutlineDistanceEnd", 10.0f);
+        mat.SetFloat("_OutlineSilhouetteBoost", 0.35f);
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    private static Material GetOrCreateConvertedNpr3Material(Material source, Shader nprShader)
+    {
+        string safeName = GetCanonicalBaseMaterialName(source.name);
+        string targetPath = Npr3ConvertedDir + "/" + safeName + "_NPR3.mat";
+        Material target = AssetDatabase.LoadAssetAtPath<Material>(targetPath);
+        if (target == null)
+        {
+            target = new Material(nprShader);
+            AssetDatabase.CreateAsset(target, targetPath);
+        }
+
+        target.shader = nprShader;
+
+        Texture baseMap = null;
+        if (source.HasProperty("_BaseMap"))
+            baseMap = source.GetTexture("_BaseMap");
+        else if (source.HasProperty("_MainTex"))
+            baseMap = source.GetTexture("_MainTex");
+        target.SetTexture("_BaseMap", baseMap);
+
+        Texture2D rampTex = AssetDatabase.LoadAssetAtPath<Texture2D>(Npr2DefaultRampPath);
+        if (rampTex != null)
+            target.SetTexture("_RampMap", rampTex);
+
+        if (source.HasProperty("_BaseMap_ST"))
+            target.SetVector("_BaseMap_ST", source.GetVector("_BaseMap_ST"));
+
+        Color baseColor = Color.white;
+        if (source.HasProperty("_BaseColor"))
+            baseColor = source.GetColor("_BaseColor");
+        else if (source.HasProperty("_Color"))
+            baseColor = source.GetColor("_Color");
+        target.SetColor("_BaseColor", baseColor);
+
+        if (source.HasProperty("_BumpMap"))
+            target.SetTexture("_NormalMap", source.GetTexture("_BumpMap"));
+        if (source.HasProperty("_BumpScale"))
+            target.SetFloat("_NormalScale", source.GetFloat("_BumpScale"));
+
+        float cutoff = source.HasProperty("_Cutoff") ? source.GetFloat("_Cutoff") : 0.5f;
+        target.SetFloat("_Cutoff", cutoff);
+        target.SetFloat("_AlphaClip", source.IsKeywordEnabled("_ALPHATEST_ON") ? 1.0f : 0.0f);
+
+        target.SetFloat("_RampOffset", 0.0f);
+        target.SetFloat("_RampContrast", 1.28f);
+        target.SetFloat("_RampStrength", 1.10f);
+        target.SetFloat("_RampBands", 4.0f);
+        target.SetFloat("_ShadowStrength", 0.92f);
+        target.SetFloat("_AmbientStrength", 0.14f);
+        target.SetColor("_ShadowTintColor", new Color(0.75f, 0.83f, 1.0f, 1.0f));
+        target.SetFloat("_ShadowTintStrength", 0.35f);
+        target.SetColor("_ShadowCoolColor", new Color(0.72f, 0.82f, 1.0f, 1.0f));
+        target.SetColor("_ShadowWarmColor", new Color(1.0f, 0.86f, 0.74f, 1.0f));
+        target.SetFloat("_ShadowStylizeStrength", 0.0f);
+        target.SetFloat("_ShadowTerminatorWidth", 0.28f);
+        target.SetFloat("_ShadowTerminatorSoftness", 0.22f);
+        target.SetColor("_SpecColor", new Color(0.38f, 0.38f, 0.38f, 1.0f));
+        target.SetFloat("_SpecThreshold", 0.994f);
+        target.SetFloat("_SpecSoftness", 0.005f);
+        target.SetFloat("_HairSpecStrength", 0.0f);
+        target.SetFloat("_HairSpecShift", 0.10f);
+        target.SetFloat("_HairSpecExponent1", 64.0f);
+        target.SetFloat("_HairSpecExponent2", 20.0f);
+        target.SetFloat("_HairSpecSecondaryStrength", 0.45f);
+        target.SetColor("_RimColor", Color.white);
+        target.SetFloat("_RimPower", 3.8f);
+        target.SetFloat("_RimStrength", 0.08f);
+        target.SetFloat("_AdditionalLightStrength", 0.10f);
+        target.SetFloat("_ColorSaturation", 1.30f);
+        target.SetFloat("_FaceRegionWeight", 0.0f);
+        target.SetFloat("_FaceShadowLift", 0.0f);
+        target.SetFloat("_FaceForwardWrap", 0.0f);
+        target.SetFloat("_FaceSpecBoost", 0.0f);
+        target.SetFloat("_FaceRimSuppress", 0.0f);
+        target.SetColor("_OutlineColor", new Color(0.08f, 0.11f, 0.16f, 1.0f));
+        target.SetFloat("_OutlineWidth", 3.0f);
+        target.SetFloat("_OutlineMinScale", 0.55f);
+        target.SetFloat("_OutlineDistanceStart", 2.0f);
+        target.SetFloat("_OutlineDistanceEnd", 10.0f);
+        target.SetFloat("_OutlineSilhouetteBoost", 0.35f);
+
+        EditorUtility.SetDirty(target);
+        return target;
+    }
+
     private static void CaptureFromCamera(Camera cam, string outputPath, int width, int height)
     {
         RenderTexture prevRT = cam.targetTexture;
@@ -960,6 +1266,31 @@ public static class DynamicFxLabBuilder
         for (int i = 0; i < invalid.Length; i++)
             result = result.Replace(invalid[i], '_');
         return result;
+    }
+
+    private static string GetCanonicalBaseMaterialName(string rawName)
+    {
+        if (string.IsNullOrEmpty(rawName))
+            return "Material";
+
+        string name = rawName;
+        string[] knownSuffixes = { "_NPR0", "_NPR2", "_NPR3", "_NPR4" };
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            for (int i = 0; i < knownSuffixes.Length; i++)
+            {
+                string suffix = knownSuffixes[i];
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    name = name.Substring(0, name.Length - suffix.Length);
+                    changed = true;
+                }
+            }
+        }
+
+        return SanitizeFileName(name);
     }
 
     private static void SnapCharacterToGround(GameObject character)

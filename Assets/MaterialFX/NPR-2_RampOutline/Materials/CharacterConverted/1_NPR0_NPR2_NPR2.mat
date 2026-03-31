@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: 1_NPR0_NPR2_NPR2
-  m_Shader: {fileID: 4800000, guid: 1bdd48b4433d2ea4d8036d63179155f4, type: 3}
+  m_Shader: {fileID: 4800000, guid: 4c1bf6c61a82bb5439bd03df1f227969, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -34,24 +34,27 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AdditionalLightStrength: 0.10
+    - _AdditionalLightStrength: 0.12
     - _AlphaClip: 0
-    - _AmbientStrength: 0.13
+    - _AmbientStrength: 0.12
+    - _ShadowTintStrength: 0.35
+    - _ColorSaturation: 1.75
     - _Cutoff: 0.5
-    - _ColorSaturation: 1.42
     - _NormalScale: 1
-    - _OutlineWidth: 3.1
-    - _RampContrast: 1.36
+    - _OutlineWidth: 3.2
+    - _RampContrast: 1.42
     - _RampOffset: 0
     - _RampStrength: 1.15
+    - _RampBands: 4
     - _RimPower: 3.8
-    - _RimStrength: 0.08
-    - _ShadowStrength: 0.95
+    - _RimStrength: 0.21000001
+    - _ShadowStrength: 0.92
     - _SpecSoftness: 0.0045
     - _SpecThreshold: 0.995
     m_Colors:
-    - _BaseColor: {r: 1.16, g: 1.10, b: 1.00, a: 1}
+    - _BaseColor: {r: 1.16, g: 1.1, b: 1, a: 1}
     - _OutlineColor: {r: 0.08, g: 0.11, b: 0.16, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecColor: {r: 0.40, g: 0.40, b: 0.40, a: 1}
+    - _ShadowTintColor: {r: 0.75, g: 0.83, b: 1, a: 1}
+    - _SpecColor: {r: 0.38, g: 0.38, b: 0.38, a: 1}
   m_BuildTextureStacks: []

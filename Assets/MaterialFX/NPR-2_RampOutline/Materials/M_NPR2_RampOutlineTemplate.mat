@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_NPR2_RampOutlineTemplate
-  m_Shader: {fileID: 4800000, guid: 1bdd48b4433d2ea4d8036d63179155f4, type: 3}
+  m_Shader: {fileID: 4800000, guid: 4c1bf6c61a82bb5439bd03df1f227969, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -37,6 +37,7 @@ Material:
     - _AdditionalLightStrength: 0.10
     - _AlphaClip: 0
     - _AmbientStrength: 0.15
+    - _ShadowTintStrength: 0.35
     - _Cutoff: 0.5
     - _ColorSaturation: 1.30
     - _NormalScale: 1
@@ -44,6 +45,7 @@ Material:
     - _RampContrast: 1.24
     - _RampOffset: 0
     - _RampStrength: 1.05
+    - _RampBands: 4
     - _RimPower: 3.8
     - _RimStrength: 0.10
     - _ShadowStrength: 0.88
@@ -53,5 +55,6 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.08, g: 0.11, b: 0.16, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShadowTintColor: {r: 0.75, g: 0.83, b: 1, a: 1}
     - _SpecColor: {r: 0.38, g: 0.38, b: 0.38, a: 1}
   m_BuildTextureStacks: []
