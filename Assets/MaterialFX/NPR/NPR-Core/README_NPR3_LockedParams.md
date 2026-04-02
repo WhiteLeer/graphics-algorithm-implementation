@@ -1,12 +1,12 @@
 ﻿# NPR-3 Locked Parameters
 
-- Generated At: 2026-04-01 16:20:54
-- Source: `Assets/MaterialFX/NPR/NPR-Core/Materials/Profiles`
+- Generated At: 2026-04-01 19:44:15
+- Source: `Assets/MaterialFX/NPR/NPR-Core/Materials/StyleProfiles`
 - Purpose: Lock current approved style params and allow one-click restore.
 
 ## Genshin
 
-### 0_NPR3_Face_NPR6
+### 0_NPR3_Face_NPR6_Genshin
 - `_ColorSaturation`: 1.6
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1.08
@@ -24,7 +24,7 @@
 - `_OutlineWidthMapStrength`: 0.72
 - `_OutlineUseVertexColorNormal`: 1
 
-### 0_NPR3
+### 0_NPR3_Genshin
 - `_ColorSaturation`: 1.6
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1.08
@@ -42,7 +42,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 1_NPR3
+### 1_NPR3_Genshin
 - `_ColorSaturation`: 1.6
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1.08
@@ -60,7 +60,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 2_NPR3
+### 2_NPR3_Genshin
 - `_ColorSaturation`: 1.6
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1.08
@@ -80,7 +80,7 @@
 
 ## HSR
 
-### 0_NPR3_Face_NPR6
+### 0_NPR3_Face_NPR6_HSR
 - `_ColorSaturation`: 1.48
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1
@@ -98,7 +98,7 @@
 - `_OutlineWidthMapStrength`: 0.72
 - `_OutlineUseVertexColorNormal`: 1
 
-### 0_NPR3
+### 0_NPR3_HSR
 - `_ColorSaturation`: 1.48
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1
@@ -116,7 +116,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 1_NPR3
+### 1_NPR3_HSR
 - `_ColorSaturation`: 1.48
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1
@@ -134,7 +134,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 2_NPR3
+### 2_NPR3_HSR
 - `_ColorSaturation`: 1.48
 - `_ExposureCompensation`: 1.04
 - `_ToonContrast`: 1
@@ -154,7 +154,7 @@
 
 ## ZZZ
 
-### 0_NPR3_Face_NPR6
+### 0_NPR3_Face_NPR6_ZZZ
 - `_ColorSaturation`: 1.55
 - `_ExposureCompensation`: 1
 - `_ToonContrast`: 1.02
@@ -172,7 +172,7 @@
 - `_OutlineWidthMapStrength`: 0.72
 - `_OutlineUseVertexColorNormal`: 1
 
-### 0_NPR3
+### 0_NPR3_ZZZ
 - `_ColorSaturation`: 1.55
 - `_ExposureCompensation`: 1
 - `_ToonContrast`: 1.02
@@ -190,7 +190,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 1_NPR3
+### 1_NPR3_ZZZ
 - `_ColorSaturation`: 1.55
 - `_ExposureCompensation`: 1
 - `_ToonContrast`: 1.02
@@ -208,7 +208,7 @@
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
 
-### 2_NPR3
+### 2_NPR3_ZZZ
 - `_ColorSaturation`: 1.55
 - `_ExposureCompensation`: 1
 - `_ToonContrast`: 1.02
@@ -225,4 +225,5 @@
 - `_OutlineWidth`: 2.9
 - `_OutlineWidthMapStrength`: 0.6
 - `_OutlineUseVertexColorNormal`: 1
+
 

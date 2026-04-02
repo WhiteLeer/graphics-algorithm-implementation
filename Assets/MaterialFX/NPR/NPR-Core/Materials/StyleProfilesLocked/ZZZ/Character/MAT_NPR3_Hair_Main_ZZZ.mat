@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MAT_NPR3_Hair_Main_ZZZ
+  m_Shader: {fileID: 4800000, guid: 89b2021850518184ab284b7372d51ed9, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _PACKEDMAPRULE_GENSHINLIKE
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: fb4e913388faaf34690794d5b84752ef, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FaceShadowMap:
+        m_Texture: {fileID: 2800000, guid: 19fa5eddb8c81bf48a3d01ac5c29de1b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LightMap:
+        m_Texture: {fileID: 2800000, guid: 1831895f1cc94a347a6bef7953e66c26, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OutlineWidthMap:
+        m_Texture: {fileID: 2800000, guid: 769b047d3828d6144ba1079536019131, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampMap:
+        m_Texture: {fileID: 2800000, guid: 15dd4e3e9e3e1b546a7038c453f84a97, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AdditionalLightStrength: 0.1
+    - _AlphaClip: 0
+    - _AmbientStrength: 0.12
+    - _ColorSaturation: 1.55
+    - _Cutoff: 0.5
+    - _ExposureCompensation: 1
+    - _FaceForwardWrap: 0
+    - _FaceOrientationStrength: 0
+    - _FaceRegionWeight: 0
+    - _FaceRimSuppress: 0
+    - _FaceShadowHorizontalBias: 0.04
+    - _FaceShadowLift: 0
+    - _FaceShadowMapStrength: 0
+    - _FaceShadowSoftness: 0.06
+    - _FaceSpecBoost: 0
+    - _HairAnisoStabilize: 0.82
+    - _HairSpecExponent1: 96
+    - _HairSpecExponent2: 24
+    - _HairSpecSecondaryStrength: 0.62
+    - _HairSpecShift: 0.18
+    - _HairSpecStrength: 0.85
+    - _HairSpecViewFade: 1.2
+    - _LightMapAOStrength: 1
+    - _LightMapSpecPower: 1
+    - _LightMapSpecStrength: 1
+    - _NormalScale: 1
+    - _OutlineDistanceEnd: 9
+    - _OutlineDistanceStart: 1.8
+    - _OutlineInnerSuppress: 0.05
+    - _OutlineMinScale: 0.66
+    - _OutlineSilhouetteBoost: 0.38
+    - _OutlineUseVertexColorNormal: 1
+    - _OutlineWidth: 2.9
+    - _OutlineWidthMapStrength: 0.6
+    - _OutlineZOffset: 0.0008
+    - _PackedMapRule: 0
+    - _RampBands: 5
+    - _RampContrast: 1.6
+    - _RampOffset: 0
+    - _RampStrength: 1.1
+    - _RimPower: 4.3
+    - _RimStrength: 0.12
+    - _ShadowStrength: 0.93
+    - _ShadowStylizeStrength: 0.55
+    - _ShadowTerminatorSoftness: 0.16
+    - _ShadowTerminatorWidth: 0.22
+    - _ShadowTintStrength: 0.2
+    - _SpecSoftness: 0.018
+    - _SpecThreshold: 0.982
+    - _ToonContrast: 1.02
+    - _UseFaceShadowMap: 0
+    m_Colors:
+    - _BaseColor: {r: 1.1, g: 1, b: 0.93, a: 1}
+    - _HeadForwardWS: {r: 0, g: 0, b: 1, a: 0}
+    - _HeadRightWS: {r: 1, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 0.03, g: 0.04, b: 0.06, a: 1}
+    - _RimColor: {r: 1, g: 0.86, b: 0.7, a: 1}
+    - _ShadowCoolColor: {r: 0.62, g: 0.75, b: 1, a: 1}
+    - _ShadowTintColor: {r: 0.75, g: 0.83, b: 1, a: 1}
+    - _ShadowWarmColor: {r: 1, g: 0.8, b: 0.62, a: 1}
+    - _SpecColor: {r: 0.92, g: 0.78, b: 0.56, a: 1}
+  m_BuildTextureStacks: []

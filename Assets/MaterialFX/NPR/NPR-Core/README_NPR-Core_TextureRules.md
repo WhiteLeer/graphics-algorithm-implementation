@@ -1,6 +1,6 @@
-# NPR-Core 贴图与通道规范 (NPR-3)
+﻿# NPR-Core 贴图与通道规范 (NPR-3)
 
-本文档用于固定三套风味 (`Genshin/HSR/ZZZ`) 的贴图通道规范，避免材质迁移、贴图重烘焙后出现错通道问题。
+本文档用于固定三套风格 (`Genshin/HSR/ZZZ`) 的贴图通道规范，避免材质迁移、贴图重烘焙后出现错通道问题。
 
 ## 1. 输入贴图约定
 - `_BaseMap`: sRGB
@@ -10,7 +10,7 @@
 - `_FaceShadowMap`: 线性 (sRGB 关闭)
 - `_OutlineWidthMap`: 线性 (sRGB 关闭)
 
-## 2. 三风味 LightMap 严格通道语义
+## 2. 三风格 LightMap 严格通道语义
 ### Genshin (`Custom/NPR-3/GenshinURP`)
 - `R`: Spec 参与 (与 B 取 max)
 - `G`: AO
@@ -40,14 +40,14 @@
   - `T_Face_OutlineWidth.png` / `T_Body_OutlineWidth.png` / `T_Hair_OutlineWidth.png`
 
 ## 4. 目录与资产分层
-- 生成源: `Assets/MaterialFX/NPR/NPR-Core/Textures/Generated`
-- 风味成品: `Assets/MaterialFX/NPR/NPR-Core/Textures/Profiles/{Genshin|HSR|ZZZ}`
-- 当前风味材质: `Assets/MaterialFX/NPR/NPR-Core/Materials/Profiles/{Style}/CharacterConverted`
-- 锁定参数材质: `Assets/MaterialFX/NPR/NPR-Core/Materials/LockedProfiles/{Style}/CharacterConverted`
+- 生成源: `Assets/MaterialFX/NPR/NPR-Core/Textures/SourceMaps`
+- 风格成品: `Assets/MaterialFX/NPR/NPR-Core/Textures/StyleMaps/{Genshin|HSR|ZZZ}`
+- 当前风格材质: `Assets/MaterialFX/NPR/NPR-Core/Materials/StyleProfiles/{Style}/CharacterConverted`
+- 锁定参数材质: `Assets/MaterialFX/NPR/NPR-Core/Materials/StyleProfilesLocked/{Style}/CharacterConverted`
 
 ## 5. 自动校验与触发点
-- 手动校验: `Tools/NPR 风味/校验贴图通道规范`
-- 切换风味时会自动触发一次校验。
+- 手动校验: `Tools/NPR 风格/校验贴图通道规范`
+- 切换风格时会自动触发一次校验。
 - 恢复锁定参数时会自动触发一次校验。
 
 校验项:
@@ -56,12 +56,15 @@
 
 ## 6. 参数锁定流程
 ### 固化当前版本
-- 菜单: `Tools/NPR 风味/锁定当前三风味参数(保存快照)`
+- 菜单: `Tools/NPR 风格/锁定当前三风格参数(保存快照)`
 - 输出:
   - 锁定材质快照到 `LockedProfiles`
   - 参数快照文档 `README_NPR3_LockedParams.md`
 
 ### 回滚到锁定版本
-- 菜单: `Tools/NPR 风味/恢复锁定参数(覆盖当前)`
-- 作用: 用 `LockedProfiles` 覆盖当前 `Profiles` 材质参数，保持风味稳定。
+- 菜单: `Tools/NPR 风格/恢复锁定参数(覆盖当前)`
+- 作用: 用 `LockedProfiles` 覆盖当前 `Profiles` 材质参数，保持风格稳定。
+
+
+
 
